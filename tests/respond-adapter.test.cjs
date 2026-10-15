@@ -26,4 +26,16 @@ assert.equal(empty.totals.qaFailureRate,null);
 assert.equal(empty.totals.redress,0);
 assert.equal(empty.reconciled,true);
 console.log('Respond-style adapter: clean transfer, mapping, quarantine, duplicate rejection, award reconciliation, dates, enums and zero-sample QA checks passed.');
+const explorer=require('../dist/programme-explorer.js');
+for(const scope of Object.keys(data.views)){
+ const cases=data.cases.filter(c=>explorer.matches(c,scope));
+ assert.equal(cases.length,data.views[scope].metrics.total);
+ const tested=adapter.validateBatch(adapter.fixture(cases),data.as_of,data.programmes);
+ assert.equal(tested.accepted.length,12,scope);
+ assert.equal(tested.rejected.length,3,scope);
+ assert.ok(tested.accepted.every(c=>explorer.matches(c,scope)),scope);
+ const invalid={...adapter.sourceRecord(cases[0]),ComplaintCategory:'Unmapped type'};
+ assert.equal(adapter.validateBatch([invalid],data.as_of,data.programmes).rejected.length,1);
+}
+console.log('All six contexts and both motor pathways: filter counts, adapter acceptance, lineage classification and invalid complaint rejection passed.');
 

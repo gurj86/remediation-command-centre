@@ -14,6 +14,7 @@ Regulated remediation teams need to understand where work stalls, which customer
 
 ## Explore the experience
 
+- **Product/programme explorer:** selecting one of six areas or either motor-finance pathway replaces metrics, process queues, the 3D harm network, risk measures, cohorts, trends, redress analysis, brief and scenario baseline with independently calculated Python/SQLite subset aggregates. Complaint-type case lists retain source lineage. Selections are encoded in the URL. Changing context resets the scenario and review acknowledgement. CSV downloads always contain all 10,000 cases.
 - **Aptean Respond integration concept:** prominent landing-page entry points lead to a six-step working simulation: fictional source case, governed transfer, explicit field mapping, validation/quarantine, batch analytics and lineage, and human review. My experience using Respond for complaints and remediation across my past four or five live projects grounds this proposed design. It is not a live connection or a claimed implementation on those projects.
 - **3D harm constellation:** rotate, zoom and select seven primary-cause clusters around Customer Harm. Node area encodes primary-cause volume, height encodes mean redress among upheld decisions, and link width encodes paired theme co-occurrence. Keyboard-accessible theme buttons provide equivalent drill-down.
 - **Process intelligence:** Complaint Intake → Evidence → Investigation → Decision → Redress → FRL → Closure. Select queues for volumes, stage age, seven-day exits, overdue pressure and case evidence.
@@ -52,13 +53,14 @@ Open http://localhost:8765. Use HTTP rather than opening index.html directly, be
 
 ## Data and calculation contract
 
+- Six areas: Pensions, Investments, Savings, Mortgages, Collections & Recoveries (an operational context), and Motor Finance. Motor Finance has distinct Commission & disclosure and Vehicle quality & warranty pathways.
 - 10,000 cases, seed **86**, snapshot **30 September 2026**, intake **1 January–30 September 2026**. No real customer data, identifiers or employer extracts.
 - Fields: case ID, product, complaint type, primary cause, linked themes, received/closed dates, additional-support flag, status, decision, recorded award, reviewer, team, QA result, handling hours, channel, stage, stage-entry date, age, target status, cohort and fixture duration.
 - Primary-cause categories are mutually exclusive. Linked themes can overlap. Case count by primary cause reconciles to the population; linked-theme counts must not be summed as distinct customers.
 - Redress is allocated only to upheld decisions. It is **recorded award value**, not confirmed payment or outstanding liability. Mean upheld redress uses positive awards only. Distribution excludes pending/rejected decisions. Forecast redress is a gross what-if value for the selected hypothetical population, not incremental exposure to add to recorded redress.
 - QA failure = Fail / (Pass + Fail). Not-sampled cases are excluded from this denominator. QA is assigned at the snapshot. Monthly QA trends use **received month**, not test completion date; maturity differences limit comparisons.
 - Open overdue = age > 56 days. At risk = 43–56 days. Closed cases use final duration. The 56-day threshold is a fictional programme assumption, not regulatory advice or a claim that one rule applies to every product.
-- Stages are generated using 0%, 6%, 23%, 60%, 73%, 86%, 100% of each synthetic case's modelled duration. Current stage, entry date and exits use the same timeline. Seven-day throughput counts transitions within the window for open and closed cases, with future transitions excluded. Model duration is fixture metadata, not a predictive feature. In production this must be replaced with governed event history.
+- Stages are generated using 0%, 6%, 23%, 60%, 73%, 86%, 100% of each synthetic case's modelled duration. Current stage, entry date and exits use the same timeline. Seven-day throughput counts transitions within the window for open and closed cases, with future transitions excluded. Model duration is fixture metadata, not a predictive feature. Additional operational fields record complaint type, pathway, evidence completeness, specialist-review state and reported vehicle-safety concern. Synthetic uphold decisions and awards are generated placeholders, not determinations of suitability, liability or regulatory eligibility. In production this must be replaced with governed event history.
 - Risk index = 100 × (0.6 × overdue/open + 0.4 × failed/sampled QA), using zero when a denominator is zero. This transparent heuristic is **not a validated Consumer Duty or customer-harm score**. The largest cell uses relative colour scaling, not regulatory thresholds.
 - Outliers = award > Q3 + 1.5 × IQR, using linearly interpolated quantiles. A flag is not evidence of an error. Synthetic associations do not establish causation or say anything about real groups or products.
 
@@ -92,7 +94,7 @@ Parallel pipelines, 6 productive hours/day, no new arrivals, absence, ramp-up, d
 
 ## Deployment
 
-`dist/` is deployable on any static host. `render.yaml` defines a Render Static Site: build `python3 analytics/build.py`, publish `dist`. The dataset and local Plotly bundle are committed so hosting can also use a no-op build command if Python is unavailable in a static runtime. This project has no server or paid AI API dependency.
+`dist/` is deployable on any static host. `render.yaml` defines a Render Static Site: build `python3 analytics/build.py`, publish `dist`. The local Plotly bundle and programme taxonomy are committed. The dataset and aggregate views are generated during the Python build, so the build command is required; do not use a no-op deployment command. This project has no server or paid AI API dependency.
 
 The `gurj86/remediation-command-centre` repository is connected to the Render Static Site. Changes to the connected branch trigger Render’s deployment workflow. The public Render URL has been verified.
 
@@ -100,11 +102,27 @@ The `gurj86/remediation-command-centre` repository is connected to the Render St
 
 `dist/respond-integration.html` makes the proposed upstream connection a central portfolio feature. `respond-adapter.js` transforms a fictional source contract into analytical fields and validates a local fixture drawn from the same synthetic dataset as the command centre. It does not implement a vendor API.
 
-The fixture contains 12 source cases and optionally adds three deliberate exceptions: duplicate reference, missing reference and negative recorded award. The adapter computes input/accepted/rejected reconciliation, accepted award totals and sampled-QA denominators. Rejected rows never enter this batch’s analytics. The separate 10,000-case programme snapshot is unchanged by the walkthrough. Case lineage links to the matching cause in the 3D network. A downloadable JSON evidence pack includes mapping, exceptions, computed totals and a local reviewer acknowledgement.
+The walkthrough offers six contexts and both motor-finance pathways, with relevant cases, evidence and control points. The fixture contains 12 source cases and optionally adds three deliberate exceptions: duplicate reference, missing reference and negative recorded award. The adapter computes input/accepted/rejected reconciliation, accepted award totals and sampled-QA denominators. Rejected rows never enter this batch’s analytics. The 10,000-case programme snapshot is unchanged by the walkthrough. Its lineage link opens the selected context and matching cause, while the integration batch remains a separately labelled 12-case fixture. Case lineage links to the matching cause in the 3D network. A downloadable JSON evidence pack includes mapping, exceptions, computed totals and a local reviewer acknowledgement.
 
 The CSV/API choice is a **design explanation**, not a connection switch. There are no requests to Aptean, invented vendor endpoints, credentials, persistent quarantine, cross-batch deduplication, source corrections or write-backs. Source field names and the concept screen are independently designed illustrations, not Respond UI or an official schema. Exact supported interfaces depend on the installed/configured deployment and require agreement with the platform owner and Aptean. A real implementation requires secure server-side access, data-contract agreement, event semantics, checkpoint/retry/replay design, source reconciliation, monitoring, data protection and operational approval.
 
 Vendor context: [Aptean complaints and case management](https://www.aptean.com/en-GB/solutions/complaints-and-case-management), [Respond product datasheet](https://lp.aptean.com/rs/181-TRF-125/images/Aptean-Respond-Datasheet-en.pdf). These describe the product and integration capability, not this illustrative contract.
+
+## Product and complaint coverage
+
+| Area | Synthetic complaint types / focus |
+|---|---|
+| Pensions | Annual review not completed or communicated, ongoing service, product/advice suitability, benefit calculations |
+| Investments | Instruction delay, disclosure, calculation and suitability concerns |
+| Savings | Interest disputes, calculation errors, communications |
+| Mortgages | Payment allocation, servicing and investigation delays |
+| Collections & Recoveries | Arrears contact, affordability assessment concerns, forbearance, repayment-arrangement review, additional support |
+| Motor Finance — Commission & disclosure | Disclosure concerns and missing agreement/broker evidence |
+| Motor Finance — Vehicle quality & warranty | Reported braking/safety or engine/gearbox concerns, repeated repairs, rejection requests, parts/modification warranty disputes |
+
+`dist/programmes.json` is the shared illustrative taxonomy. Collections & Recoveries is a mutually exclusive synthetic operational population, not a financial product or an overlapping count of mortgage cases. Underlying account-product distinctions would need additional fields in a real implementation. Root-cause nodes are broad operational themes; they do not establish a mechanical diagnosis or legal liability. Review flags cover historical and open cases unless explicitly labelled awaiting review. Cases awaiting specialist review are counted from the synthetic `Required` state. Specialist suitability/loss calculations, affordability/forbearance decisions, commission scheme rules and mechanical/warranty determinations are outside this prototype.
+
+The build produces `analytics.json` and `synthetic-cases.csv`. Neither generated file is tracked in the repository; run `python analytics/build.py` before preview or tests. JSON contains the complete 10,000-case snapshot plus aggregate-only views for six areas and two motor pathways; the browser filters case evidence to the same scope without inventing metrics. The same Python analytics function calculates each scope. Use a WebGL landscape for all areas and a 3D team-risk profile for a single selected area.
 
 ## Known limits
 

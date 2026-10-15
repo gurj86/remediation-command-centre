@@ -1,12 +1,12 @@
 /* Independently designed, fictional source contract. Not an Aptean API implementation. */
 (function(root){
  'use strict';
- const mappings=[['CaseReference','case_id','Stable source reference; never a customer identifier'],['ProductCategory','product','Agreed product reference list'],['RootCauseTheme','root_cause','Primary cause; linked themes retained separately'],['DateReceived','received_date','ISO date; snapshot-aware validation'],['SupportRequired','vulnerable','Y / N → 1 / 0'],['WorkflowStage','stage','Agreed stage reference list'],['Decision','outcome','Uphold / Reject / Pending'],['RecordedAwardGBP','redress','Non-negative GBP recorded award; not payment confirmation'],['ReviewTeam','team','Fictional delivery team'],['QualityResult','qa_result','Pass / Fail / Not sampled'],['MigrationCohort','cohort','Programme cohort reference'],['LinkedThemes','linked_themes','List → delimited analytical themes']];
- function sourceRecord(c){return {CaseReference:c.case_id,ProductCategory:c.product,RootCauseTheme:c.root_cause,DateReceived:c.received_date,SupportRequired:c.vulnerable?'Y':'N',WorkflowStage:c.stage,Decision:c.outcome,RecordedAwardGBP:c.redress,ReviewTeam:c.team,QualityResult:c.qa_result,MigrationCohort:c.cohort,LinkedThemes:c.linked_themes.split('|')}}
- function canonical(s){return {case_id:s.CaseReference,product:s.ProductCategory,root_cause:s.RootCauseTheme,received_date:s.DateReceived,vulnerable:s.SupportRequired==='Y'?1:0,stage:s.WorkflowStage,outcome:s.Decision,redress:s.RecordedAwardGBP,team:s.ReviewTeam,qa_result:s.QualityResult,cohort:s.MigrationCohort,linked_themes:s.LinkedThemes.join('|')}}
+ const mappings=[['CaseReference','case_id','Stable source reference; never a customer identifier'],['ProductCategory','product','Agreed product or operational-context reference list'],['ComplaintCategory','complaint_type','Product-specific complaint classification'],['ComplaintPathway','pathway','Keep motor commission and vehicle-quality pathways distinct'],['EvidenceCompleteness','evidence_status','Explicit missing-evidence flag'],['SpecialistReview','specialist_review','Required / Completed / Not required; human assessment'],['ReportedSafetyConcern','safety_flag','Y / N → 1 / 0; an allegation, not a mechanical finding'],['RootCauseTheme','root_cause','Illustrative operational primary cause; not a suitability, mechanical or liability finding'],['DateReceived','received_date','ISO date; snapshot-aware validation'],['SupportRequired','vulnerable','Y / N → 1 / 0'],['WorkflowStage','stage','Agreed stage reference list'],['Decision','outcome','Uphold / Reject / Pending'],['RecordedAwardGBP','redress','Non-negative GBP recorded award; not payment confirmation'],['ReviewTeam','team','Fictional delivery team'],['QualityResult','qa_result','Pass / Fail / Not sampled'],['MigrationCohort','cohort','Programme cohort reference'],['LinkedThemes','linked_themes','List → delimited analytical themes']];
+ function sourceRecord(c){return {CaseReference:c.case_id,ProductCategory:c.product,ComplaintCategory:c.complaint_type,ComplaintPathway:c.pathway,EvidenceCompleteness:c.evidence_status,SpecialistReview:c.specialist_review,ReportedSafetyConcern:c.safety_flag?'Y':'N',RootCauseTheme:c.root_cause,DateReceived:c.received_date,SupportRequired:c.vulnerable?'Y':'N',WorkflowStage:c.stage,Decision:c.outcome,RecordedAwardGBP:c.redress,ReviewTeam:c.team,QualityResult:c.qa_result,MigrationCohort:c.cohort,LinkedThemes:c.linked_themes.split('|')}}
+ function canonical(s){return {case_id:s.CaseReference,product:s.ProductCategory,complaint_type:s.ComplaintCategory,pathway:s.ComplaintPathway,evidence_status:s.EvidenceCompleteness,specialist_review:s.SpecialistReview,safety_flag:s.ReportedSafetyConcern==='Y'?1:0,root_cause:s.RootCauseTheme,received_date:s.DateReceived,vulnerable:s.SupportRequired==='Y'?1:0,stage:s.WorkflowStage,outcome:s.Decision,redress:s.RecordedAwardGBP,team:s.ReviewTeam,qa_result:s.QualityResult,cohort:s.MigrationCohort,linked_themes:s.LinkedThemes.join('|')}}
  const stages=['Complaint Intake','Evidence','Investigation','Decision','Redress','FRL','Closure'];
  const causes=['Delayed payments','Incorrect calculations','Poor disclosure','Vulnerability handling','Migration issues','Evidence gaps','Complaint handling'];
- function validateBatch(records,asOf){
+ function validateBatch(records,asOf,programmes){
   const seen=new Set(),accepted=[],rejected=[];
   records.forEach((s,i)=>{
    const errors=[];
@@ -14,7 +14,12 @@
    if(seen.has(s.CaseReference))errors.push('Duplicate source reference within this batch');
    const timestamp=Date.parse(s.DateReceived);
    if(!/^\d{4}-\d{2}-\d{2}$/.test(s.DateReceived)||!Number.isFinite(timestamp)||new Date(timestamp).toISOString().slice(0,10)!==s.DateReceived||s.DateReceived>asOf)errors.push('Invalid received date or later than snapshot');
-   if(!['Investments','Pensions','Savings','Mortgages'].includes(s.ProductCategory))errors.push('Unmapped product category');
+   if(!['Investments','Pensions','Savings','Mortgages','Collections & Recoveries','Motor Finance'].includes(s.ProductCategory))errors.push('Unmapped product or context');
+   if(!s.ComplaintCategory||!s.ComplaintPathway)errors.push('Complaint type and pathway are required');
+   if(programmes){const p=programmes.find(p=>p.product===s.ProductCategory);const t=p?.types.find(t=>t.name===s.ComplaintCategory);if(!t||s.ComplaintPathway!==(t.pathway||p.product))errors.push('Complaint classification does not match the product / pathway contract')}
+   if(!['Complete','Incomplete'].includes(s.EvidenceCompleteness))errors.push('Unknown evidence completeness');
+   if(!['Required','Completed','Not required'].includes(s.SpecialistReview))errors.push('Unknown specialist-review state');
+   if(!['Y','N'].includes(s.ReportedSafetyConcern))errors.push('Unknown reported safety indicator');
    if(!causes.includes(s.RootCauseTheme))errors.push('Unmapped root-cause theme');
    if(!['Y','N'].includes(s.SupportRequired))errors.push('Unknown support indicator; do not silently default');
    if(!stages.includes(s.WorkflowStage))errors.push('Unmapped workflow stage');

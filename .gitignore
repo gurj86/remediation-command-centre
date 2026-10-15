@@ -4,4 +4,6 @@ __pycache__/
 .env.*
 .openai/local*
 node_modules/
+dist/analytics.json
+dist/synthetic-cases.csv
 

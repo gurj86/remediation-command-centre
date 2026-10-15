@@ -8,7 +8,8 @@ AS_OF = date(2026, 9, 30)
 STAGES = ['Complaint Intake', 'Evidence', 'Investigation', 'Decision', 'Redress', 'FRL', 'Closure']
 FRACTIONS = [0,.06,.23,.60,.73,.86,1]
 CAUSES = ['Delayed payments', 'Incorrect calculations', 'Poor disclosure', 'Vulnerability handling', 'Migration issues', 'Evidence gaps', 'Complaint handling']
-PRODUCTS = ['Investments', 'Pensions', 'Savings', 'Mortgages']
+PROGRAMMES = json.loads((ROOT/'dist'/'programmes.json').read_text(encoding='utf-8'))
+PRODUCTS = [p['product'] for p in PROGRAMMES]
 TEAMS = ['North', 'Central', 'South', 'Specialist']
 
 def generate(n=10000):
@@ -17,9 +18,11 @@ def generate(n=10000):
     for i in range(n):
         received = date(2026,1,1)+timedelta(days=r.randrange(273))
         age=(AS_OF-received).days
-        product=r.choices(PRODUCTS,[32,28,24,16])[0]
+        product=r.choices(PRODUCTS,[22,18,12,17,15,16])[0]
+        profile=next(p for p in PROGRAMMES if p['product']==product)
+        complaint=r.choice(profile['types'])
         cohort=r.choices(['Legacy','Wave 1','Wave 2','Wave 3'],[25,25,30,20])[0]
-        cause=r.choices(CAUSES,[19,19,13,10,18 if cohort=='Wave 3' else 9,15,15])[0]
+        cause=complaint['cause'] if r.random()<.65 else r.choices(CAUSES,[19,19,13,10,18 if cohort=='Wave 3' else 9,15,15])[0]
         vulnerable=int(r.random()<.23)
         duration=max(4,round(r.lognormvariate(3.25,.52)+(18 if cause=='Evidence gaps' else 0)+(12 if cohort=='Wave 3' else 0)))
         closed=age>=duration
@@ -35,7 +38,11 @@ def generate(n=10000):
         if r.random()<.4: themes.append(r.choice([c for c in CAUSES if c!=cause]))
         stage_entered=received+timedelta(days=round(duration*FRACTIONS[stage]))
         days_stage=0 if closed else (AS_OF-stage_entered).days
-        rows.append(dict(case_id=f'RMD-{i+1:05d}',product=product,complaint_type={'Investments':'Instruction delay','Pensions':'Benefit calculation','Savings':'Interest dispute','Mortgages':'Payment allocation'}[product],root_cause=cause,received_date=received.isoformat(),vulnerable=vulnerable,customer_segment='Additional support' if vulnerable else 'Standard',status='Closed' if closed else 'Open',outcome=outcome,redress=redress,team=r.choice(TEAMS),reviewer=f'RV-{r.randrange(1,41):02d}',qa_result=qa_result,handling_hours=round(r.uniform(2,8)+2*(cause=='Evidence gaps')+vulnerable,2),channel=r.choice(['Phone','Email','Online','Letter']),stage=STAGES[stage],stage_index=stage,days_in_stage=days_stage,age_days=age,sla_status='Closed late' if closed and duration>56 else 'Closed within target' if closed else 'Overdue' if age>56 else 'At risk' if age>42 else 'Within target',cohort=cohort,linked_themes='|'.join(themes),closed_date=closed_date))
+        rows.append(dict(case_id=f'RMD-{i+1:05d}',product=product,complaint_type=complaint['name'],root_cause=cause,received_date=received.isoformat(),vulnerable=vulnerable,customer_segment='Additional support' if vulnerable else 'Standard',status='Closed' if closed else 'Open',outcome=outcome,redress=redress,team=r.choice(TEAMS),reviewer=f'RV-{r.randrange(1,41):02d}',qa_result=qa_result,handling_hours=round(r.uniform(2,8)+2*(cause=='Evidence gaps')+vulnerable+1.5*complaint['specialist'],2),channel=r.choice(['Phone','Email','Online','Letter']),stage=STAGES[stage],stage_index=stage,days_in_stage=days_stage,age_days=age,sla_status='Closed late' if closed and duration>56 else 'Closed within target' if closed else 'Overdue' if age>56 else 'At risk' if age>42 else 'Within target',cohort=cohort,linked_themes='|'.join(themes),closed_date=closed_date))
+        rows[-1]['pathway']=complaint.get('pathway',product)
+        rows[-1]['specialist_review']='Completed' if complaint['specialist'] and decided else 'Required' if complaint['specialist'] else 'Not required'
+        rows[-1]['evidence_status']='Incomplete' if r.random()<(.40 if cause=='Evidence gaps' else .12) else 'Complete'
+        rows[-1]['safety_flag']=int(complaint['name']=='Vehicle braking or safety concern')
         rows[-1]['model_duration_days']=duration
         rows[-1]['stage_entered_date']=stage_entered.isoformat()
     return rows
@@ -94,10 +101,26 @@ def calculate(rows):
     weekly=[]
     for start,end in [('2026-09-17','2026-09-23'),('2026-09-24','2026-09-30')]:
         weekly.append(dict(start=start,end=end,received=q('SELECT COUNT(*) n FROM cases WHERE received_date BETWEEN ? AND ?',(start,end))[0]['n'],closed=q('SELECT COUNT(*) n FROM cases WHERE closed_date BETWEEN ? AND ?',(start,end))[0]['n']))
-    return dict(as_of=AS_OF.isoformat(),metrics=metrics,stages=stages,causes=causes,links=links,risk=risk,cohorts=cohorts,vulnerability=vulnerability,monthly=monthly,weekly=weekly,distribution=distribution,outlier_fence=fence,outlier_count=sum(x>fence for x in redresses),top_cases=sorted(rows,key=lambda x:x['redress'],reverse=True)[:20],cases=rows)
+    complaint_types=q("""SELECT complaint_type,COUNT(*) volume,SUM(status='Open') open,SUM(redress) redress,
+      SUM(evidence_status='Incomplete') evidence_gaps,SUM(specialist_review='Required') specialist_pending,
+      SUM(safety_flag=1) safety_flags FROM cases GROUP BY complaint_type ORDER BY volume DESC""")
+    return dict(as_of=AS_OF.isoformat(),metrics=metrics,stages=stages,causes=causes,links=links,risk=risk,cohorts=cohorts,vulnerability=vulnerability,monthly=monthly,weekly=weekly,distribution=distribution,outlier_fence=fence,outlier_count=sum(x>fence for x in redresses),top_cases=sorted(rows,key=lambda x:x['redress'],reverse=True)[:20],complaint_types=complaint_types,cases=rows)
+
+def build_package(rows):
+    result=calculate(rows)
+    views={}
+    for product in PRODUCTS:
+        snapshot=calculate([r for r in rows if r['product']==product])
+        snapshot.pop('cases');snapshot.pop('top_cases');views[product]=snapshot
+    for pathway in ['Commission & disclosure','Vehicle quality & warranty']:
+        snapshot=calculate([r for r in rows if r['product']=='Motor Finance' and r['pathway']==pathway])
+        snapshot.pop('cases');snapshot.pop('top_cases');views['Motor Finance::'+pathway]=snapshot
+    result['views']=views
+    result['programmes']=PROGRAMMES
+    return result
 
 if __name__=='__main__':
-    rows=generate(); result=calculate(rows)
+    rows=generate(); result=build_package(rows)
     dest=ROOT/'dist'; dest.mkdir(exist_ok=True)
     (dest/'analytics.json').write_text(json.dumps(result,separators=(',',':')),encoding='utf-8')
     with (dest/'synthetic-cases.csv').open('w',newline='',encoding='utf-8') as f:

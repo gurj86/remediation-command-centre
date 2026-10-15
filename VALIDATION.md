@@ -24,3 +24,9 @@ Validated locally on 15 October 2026. Fixed synthetic snapshot: 30 September 202
 
 Browser checks are representative interactions, not exhaustive accessibility or cross-browser certification. No real customer workflow, API integration or production service-level guarantee is tested. Deployment status and URLs are reported separately after publishing.
 
+## Six-area expansion
+
+- Five Python test groups pass, including coverage of every configured complaint type; scope-to-row reconciliation for totals, redress, QA, stages, outliers and seven-day transitions; and disjoint motor-finance pathways.
+- Respond adapter checks cover all six contexts and both motor pathways, with accepted/rejected reconciliation and rejection of a mismatched complaint classification.
+- Forecast tests continue to pass. Browser verification is completed against the Render deployment after publication.
+

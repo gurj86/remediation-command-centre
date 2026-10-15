@@ -10,11 +10,11 @@ Hosted publicly on Render as a static site. The original v1 Sites deployment rem
 
 ## Why this project
 
-Regulated remediation teams need to understand where work stalls, which customer-harm themes overlap, where exceptions concentrate and how capacity decisions change outcomes. This prototype turns those questions into traceable operational MI and a reviewable target operating model. Gurjit's complaints/remediation platform experience informs the problem framing, rather than a claim to have implemented these integrations at an employer.
+Regulated remediation teams need to understand where work stalls, which customer-harm themes overlap, where exceptions concentrate and how capacity decisions change outcomes. This prototype turns those questions into traceable operational MI and a reviewable target operating model. My complaints/remediation platform experience informs the problem framing. I am presenting a proposed integration design, not claiming to have implemented these integrations at an employer.
 
 ## Explore the experience
 
-- **Aptean Respond integration concept:** prominent landing-page entry points lead to a six-step working simulation: fictional source case, governed transfer, explicit field mapping, validation/quarantine, batch analytics and lineage, and human review. Gurjit’s experience using Respond for complaints and remediation across his past four or five live projects grounds this proposed design. It is not a live connection or a claimed implementation on those projects.
+- **Aptean Respond integration concept:** prominent landing-page entry points lead to a six-step working simulation: fictional source case, governed transfer, explicit field mapping, validation/quarantine, batch analytics and lineage, and human review. My experience using Respond for complaints and remediation across my past four or five live projects grounds this proposed design. It is not a live connection or a claimed implementation on those projects.
 - **3D harm constellation:** rotate, zoom and select seven primary-cause clusters around Customer Harm. Node area encodes primary-cause volume, height encodes mean redress among upheld decisions, and link width encodes paired theme co-occurrence. Keyboard-accessible theme buttons provide equivalent drill-down.
 - **Process intelligence:** Complaint Intake → Evidence → Investigation → Decision → Redress → FRL → Closure. Select queues for volumes, stage age, seven-day exits, overdue pressure and case evidence.
 - **Risk concentration:** product × team heatmap and 3D landscape. Switch among a disclosed risk index, recorded redress, QA failure rate, overdue cases and additional-support populations.

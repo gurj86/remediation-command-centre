@@ -21,23 +21,25 @@ function causeDetail(c){
  $('#cause-detail').innerHTML=`<div class="eyebrow">SELECTED PRIMARY CAUSE</div><h3>${c.name}</h3><div class="cause-number">${num(c.volume)}</div><small>${pct(c.volume,D.metrics.total)} of the programme population</small><div class="cause-stats"><div><strong>${money(c.avg_redress)}</strong><small>mean upheld redress</small></div><div><strong>${pct(c.qa_fails,c.qa_sampled)}</strong><small>sampled QA fail</small></div></div><p>${num(c.open)} open cases. Strongest linked theme: ${other.toLowerCase()} (${num(strongest.count)} co-occurrences). Associations are not causal proof.</p><button id="cause-cases">Inspect ${num(c.volume)} cases ↗</button>`;$('#cause-cases').onclick=()=>showCases(c.name,x=>x.root_cause===c.name)}
  $$('#cause-buttons button').forEach(b=>b.classList.toggle('active',b.dataset.cause===selectedCause));
 }
+let showConnections=false;
 function network(){
- const max=Math.max(...D.causes.map(c=>c.avg_redress));
- const pos={};D.causes.forEach((c,i)=>{const a=i*Math.PI*2/D.causes.length;pos[c.name]=[Math.cos(a)*2.8,Math.sin(a)*2.8,c.avg_redress/max*3]});
+ const camera={eye:{x:0,y:-.35,z:2.35},up:{x:0,y:1,z:0}};
+ const maxVolume=Math.max(...D.causes.map(c=>c.volume));
+ const pos={};D.causes.forEach((c,i)=>{const a=Math.PI/2+i*Math.PI*2/D.causes.length;pos[c.name]=[Math.cos(a)*3.8,Math.sin(a)*3.2,(i%2?-.35:.35)]});
  const traces=[];
- D.links.forEach(l=>{let a=pos[l.source],b=pos[l.target];traces.push({type:'scatter3d',mode:'lines',x:[a[0],b[0]],y:[a[1],b[1]],z:[a[2],b[2]],line:{color:'#b7c8ac',width:Math.max(1,l.count/45)},opacity:.28,hoverinfo:'skip',showlegend:false})});
- D.causes.forEach((c,i)=>{const p=pos[c.name];traces.push({type:'scatter3d',mode:'lines',x:[0,p[0]],y:[0,p[1]],z:[0,p[2]],line:{color:palette[i],width:2},opacity:.55,hoverinfo:'skip',showlegend:false})});
- traces.push({type:'scatter3d',mode:'markers+text',x:[0],y:[0],z:[0],text:['CUSTOMER HARM'],textposition:'bottom center',textfont:{color:'#153c2f',size:11},marker:{size:28,color:'#184d3d',opacity:1,line:{width:2,color:'#b4cc9f'}},customdata:['all'],hovertemplate:`Customer harm<br>${num(D.metrics.total)} selected synthetic cases<extra></extra>`,showlegend:false});
- traces.push({type:'scatter3d',mode:'markers+text',x:D.causes.map(c=>pos[c.name][0]),y:D.causes.map(c=>pos[c.name][1]),z:D.causes.map(c=>pos[c.name][2]),text:D.causes.map(c=>c.name.replace(' ','<br>')),textposition:'top center',textfont:{color:'#254b3c',size:10},customdata:D.causes.map(c=>c.name),marker:{size:D.causes.map(c=>Math.sqrt(c.volume)*.57),color:palette,opacity:.96,line:{width:1,color:'#fff'}},hovertext:D.causes.map(c=>`${c.name}<br>${num(c.volume)} cases<br>${money(c.avg_redress)} mean upheld redress`),hovertemplate:'%{hovertext}<extra></extra>',showlegend:false});
- const camera={eye:{x:1.15,y:1.15,z:.85},center:{x:0,y:0,z:0}};
- Plotly.newPlot('network',traces,{...layout,margin:{l:8,r:8,t:5,b:5},scene:{xaxis:sceneAxis,yaxis:sceneAxis,zaxis:{...sceneAxis,title:{text:'MEAN UPHELD REDRESS ↑',font:{size:9}}},camera,aspectmode:'manual',aspectratio:{x:1,y:1,z:.8}},showlegend:false},plotConfig).then(()=>{
- $('#network').on('plotly_click',event=>{const name=event.points[0].customdata;if(name)causeDetail(D.causes.find(c=>c.name===name))});
+ D.links.filter(l=>showConnections&&( !selectedCause||l.source===selectedCause||l.target===selectedCause)).forEach(l=>{const a=pos[l.source],b=pos[l.target];traces.push({type:'scatter3d',mode:'lines',x:[a[0],b[0]],y:[a[1],b[1]],z:[a[2],b[2]],line:{color:'#c9dca3',width:Math.max(1,Math.min(5,l.count/80))},opacity:.45,hoverinfo:'skip',showlegend:false})});
+ D.causes.forEach(c=>{const p=pos[c.name];traces.push({type:'scatter3d',mode:'lines',x:[0,p[0]],y:[0,p[1]],z:[0,p[2]],line:{color:c.name===selectedCause?'#f5c76f':'#497c70',width:c.name===selectedCause?5:2},opacity:.8,hoverinfo:'skip',showlegend:false})});
+ traces.push({type:'scatter3d',mode:'markers+text',x:[0],y:[0],z:[0],text:['CUSTOMER<br>HARM'],textposition:'middle center',textfont:{color:'#102e28',size:13},marker:{size:44,color:'#d8e8ac',opacity:1},customdata:['all'],hovertemplate:`${num(D.metrics.total)} synthetic cases<extra></extra>`,showlegend:false});
+ traces.push({type:'scatter3d',mode:'markers+text',x:D.causes.map(c=>pos[c.name][0]),y:D.causes.map(c=>pos[c.name][1]),z:D.causes.map(c=>pos[c.name][2]),text:D.causes.map(c=>c.name.replace(' ','<br>')),textposition:'top center',textfont:{color:'#f0f5e9',size:13},customdata:D.causes.map(c=>c.name),marker:{size:D.causes.map(c=>Math.sqrt(c.volume/maxVolume)*31),color:D.causes.map(c=>c.qa_sampled?100*c.qa_fails/c.qa_sampled:null),cmin:0,cmax:100,colorscale:[[0,'#8bd3bf'],[.2,'#d8e8ac'],[.4,'#f5c76f'],[1,'#e48470']],opacity:1,line:{width:2,color:'#eff8e4'}},hovertext:D.causes.map(c=>`${c.name}<br>${num(c.volume)} cases<br>${money(c.avg_redress)} mean upheld redress<br>${pct(c.qa_fails,c.qa_sampled)} sampled QA failure`),hovertemplate:'%{hovertext}<extra></extra>',showlegend:false});
+ const axis={visible:false,range:[-5,5]};
+ Plotly.react('network',traces,{...layout,paper_bgcolor:'#102f2a',font:{color:'#e8f1e3'},margin:{l:10,r:10,t:35,b:20},uirevision:currentScope,scene:{bgcolor:'#102f2a',xaxis:axis,yaxis:axis,zaxis:{visible:false,range:[-3,3]},camera,aspectmode:'manual',aspectratio:{x:1.35,y:1.15,z:.55}},showlegend:false},{...plotConfig,displayModeBar:false}).then(()=>{
+ const chart=$('#network');chart.removeAllListeners?.('plotly_click');chart.on('plotly_click',event=>{const name=event.points[0].customdata;if(name){causeDetail(D.causes.find(c=>c.name===name));network()}});
  $('#reset-camera').onclick=()=>Plotly.relayout('network',{'scene.camera':camera});
  });
- $('#cause-buttons').innerHTML=D.causes.map(c=>`<button data-cause="${c.name}">${c.name}</button>`).join('');
- $$('#cause-buttons button').forEach(b=>b.onclick=()=>causeDetail(D.causes.find(c=>c.name===b.dataset.cause)));
- const linkedCause=new URLSearchParams(window.location.search).get('cause');
- causeDetail(D.causes.find(c=>c.name===linkedCause)||null);
+ $('#cause-buttons').innerHTML=D.causes.map(c=>`<button data-cause="${c.name}" class="${c.name===selectedCause?'active':''}">${c.name}</button>`).join('');
+ $$('#cause-buttons button').forEach(b=>b.onclick=()=>{causeDetail(D.causes.find(c=>c.name===b.dataset.cause));network()});
+ $('#show-connections').checked=showConnections;
+ $('#show-connections').onchange=e=>{showConnections=e.target.checked;network()};
 }
 function process(){
  const max=Math.max(...D.stages.filter(s=>s.stage!=='Closure').map(s=>s.volume));
@@ -48,14 +50,12 @@ function process(){
 function risk(){
  const products=[...new Set(D.risk.map(c=>c.product))],teams=['North','Central','South','Specialist'];
  const measure=$('#risk-measure').value;
- const value=c=>measure==='qa_rate'?100*c.qa_fails/Math.max(1,c.qa_sampled):c[measure];
- const cells=products.map(p=>teams.map(t=>D.risk.find(c=>c.product===p&&c.team===t)));
- const z=cells.map(row=>row.map(value));const text=cells.map(row=>row.map(c=>`${c.product} · ${c.team}<br>Cases: ${num(c.volume)}<br>Open: ${num(c.open)} · Overdue: ${num(c.overdue)}<br>QA failed / sampled: ${c.qa_fails} / ${c.qa_sampled}<br>Recorded redress: ${money(c.redress)}`));
- const colours=[[0,'#eff3db'],[.35,'#c5d899'],[.65,'#85a874'],[1,'#285744']];
- let trace=riskMode==='heatmap'?{type:'heatmap',x:teams,y:products,z,text,hovertemplate:'%{text}<extra></extra>',colorscale:colours,xgap:5,ygap:5,texttemplate:measure==='redress'?'%{z:,.0f}':'%{z:.1f}',textfont:{size:12},colorbar:{thickness:9,len:.8,tickfont:{size:8}}}:{type:'surface',x:[0,1,2,3],y:products.map((p,i)=>i),z,text,hovertemplate:'%{text}<extra></extra>',colorscale:colours,colorbar:{thickness:9,len:.8},contours:{z:{show:true,usecolormap:true,project:{z:true}}}};
- if(riskMode!=='heatmap'&&products.length===1)trace={type:'scatter3d',mode:'markers+lines',x:[0,1,2,3],y:[0,0,0,0],z:z[0],text:text[0],hovertemplate:'%{text}<extra></extra>',marker:{size:10,color:z[0],colorscale:colours},line:{color:'#76965b',width:3}};
- const options=riskMode==='heatmap'?{...layout,margin:{l:products.some(p=>p.length>18)?155:90,r:45,t:30,b:40},xaxis:{side:'top',fixedrange:true},yaxis:{autorange:'reversed',fixedrange:true}}:{...layout,margin:{l:5,r:30,t:10,b:5},scene:{xaxis:{...sceneAxis,showticklabels:true,tickvals:[0,1,2,3],ticktext:teams},yaxis:{...sceneAxis,showticklabels:true,tickvals:products.map((p,i)=>i),ticktext:products},zaxis:{...sceneAxis,showticklabels:true},camera:{eye:{x:1.4,y:1.4,z:1.1}}}};
- Plotly.react('risk-chart',[trace],options,plotConfig).then(()=>{const chart=$('#risk-chart');chart.removeAllListeners?.('plotly_click');chart.on('plotly_click',e=>{const pt=e.points[0];const p=riskMode==='heatmap'?pt.y:products[Math.round(pt.y)],t=riskMode==='heatmap'?pt.x:teams[Math.round(pt.x)];if(!p||!t)return;const c=D.risk.find(c=>c.product===p&&c.team===t);$('#risk-detail').innerHTML=`<strong>${p} / ${t}</strong> · ${num(c.volume)} cases · ${num(c.overdue)} overdue · ${pct(c.qa_fails,c.qa_sampled)} sampled QA fail <button id="risk-cases">Inspect cases ↗</button>`;$('#risk-cases').onclick=()=>showCases(`${p} / ${t}`,x=>x.product===p&&x.team===t)})});
+ const value=c=>measure==='qa_rate'?(c.qa_sampled?100*c.qa_fails/c.qa_sampled:null):c[measure];
+ const format=c=>{const v=value(c);return v===null?'Not sampled':measure==='redress'?money(v):measure==='qa_rate'?v.toFixed(1)+'%':measure==='risk_score'?v.toFixed(1):num(v)};
+ const max=Math.max(1,...D.risk.map(value).filter(v=>v!==null));
+ const cell=c=>{const v=value(c),intensity=v===null?0:v/max;return `<button class="risk-tile" data-product="${c.product}" data-team="${c.team}" style="--shade:${intensity};background:hsl(${155-115*intensity} 38% ${94-66*intensity}%);color:${intensity>.65?'#fff':'#183c32'}" aria-label="${c.product}, ${c.team}, ${$('#risk-measure').selectedOptions[0].textContent}: ${format(c)}"><strong>${format(c)}</strong><small>${num(c.volume)} cases</small></button>`};
+ $('#risk-chart').innerHTML=riskMode==='heatmap'?`<div class="risk-grid" style="--rows:${products.length}"><div class="risk-heading">Product / team</div>${teams.map(t=>`<div class="risk-heading">${t}</div>`).join('')}${products.map(p=>`<strong class="risk-product">${p}</strong>${teams.map(t=>cell(D.risk.find(c=>c.product===p&&c.team===t))).join('')}`).join('')}</div>`:`<div class="ranked-risk">${[...D.risk].sort((a,b)=>(value(b)??-1)-(value(a)??-1)).map(c=>`<div class="risk-ranked-row"><span>${c.product} · ${c.team}</span>${cell(c)}</div>`).join('')}</div>`;
+ $$('#risk-chart button').forEach(button=>button.onclick=()=>{const p=button.dataset.product,t=button.dataset.team,c=D.risk.find(c=>c.product===p&&c.team===t);$$('#risk-chart button').forEach(b=>b.classList.toggle('selected',b===button));$('#risk-detail').innerHTML=`<strong>${p} / ${t}</strong> · ${num(c.volume)} cases · ${num(c.open)} open · ${num(c.overdue)} overdue · ${pct(c.qa_fails,c.qa_sampled)} sampled QA fail · ${money(c.redress)} recorded awards <button id="risk-cases">Inspect cases ↗</button>`;$('#risk-cases').onclick=()=>showCases(`${p} / ${t}`,x=>x.product===p&&x.team===t)});
 }
 function signals(){
  const worst=[...D.cohorts].sort((a,b)=>b.qa_fails/b.qa_sampled-a.qa_fails/a.qa_sampled)[0];const top=[...D.causes].sort((a,b)=>b.redress-a.redress)[0];
@@ -102,7 +102,7 @@ function applyScope(key){
  ProgrammeExplorer.render(ROOT_DATA,key,D,type=>showCases(type,c=>c.complaint_type===type));
  $('#risk-detail').textContent='Select a cell to inspect the underlying cases.';
  $('#load-status').hidden=true;
- if(typeof Plotly!=='undefined'){network();risk();signals()}
+ if(typeof Plotly!=='undefined'){const linkedCause=new URLSearchParams(window.location.search).get('cause');causeDetail(D.causes.find(c=>c.name===linkedCause)||null);network();risk();signals()}
  else{$('#network').innerHTML='<p class="fallback">3D rendering unavailable. Use the case lists in the programme selector.</p>';causeDetail(null)}
 }
 async function start(){

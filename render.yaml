@@ -11,7 +11,7 @@ services:
       - path: /*
         name: Referrer-Policy
         value: strict-origin-when-cross-origin
-      - path: /analytics.json
+      - path: /*
         name: Cache-Control
-        value: public, max-age=300
+        value: no-cache
 

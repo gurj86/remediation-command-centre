@@ -2,6 +2,7 @@
 (function(){
  const $=s=>document.querySelector(s);
  const escape=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ if(!$('#respond-context')){window.location.replace('respond-integration.html?release=six-areas-1');return}
  const gbp=x=>new Intl.NumberFormat('en-GB',{style:'currency',currency:'GBP',maximumFractionDigits:2}).format(x);
  const pct=(a,b)=>b?(a/b*100).toFixed(1)+'%':'N/A — no sampled QA';
  const names=['Source case','Governed transfer','Field mapping','Validation gate','Analytics & lineage','Human review'];
@@ -78,6 +79,6 @@
   const url=new URL(window.location.href);if(key==='all')url.searchParams.delete('scope');else url.searchParams.set('scope',key);window.history.replaceState({},'',url);
   render();
  }
- fetch('analytics.json').then(r=>{if(!r.ok)throw Error('Synthetic extract unavailable');return r.json()}).then(d=>{fullData=d;const requested=new URLSearchParams(window.location.search).get('scope')||'all';const initial=requested==='all'||d.views[requested]?requested:'all';const picker=$('#respond-context');picker.innerHTML=ProgrammeExplorer.options(d.programmes,initial);picker.value=initial;picker.disabled=false;picker.onchange=()=>selectContext(picker.value);selectContext(initial)}).catch(()=>{$('#integration-status').textContent='The synthetic extract could not load. Reload this page when the site is available.';$('#integration-next').disabled=true});
+ fetch('analytics.json?v=six-areas-1').then(r=>{if(!r.ok)throw Error('Synthetic extract unavailable');return r.json()}).then(d=>{fullData=d;const requested=new URLSearchParams(window.location.search).get('scope')||'all';const initial=requested==='all'||d.views[requested]?requested:'all';const picker=$('#respond-context');picker.innerHTML=ProgrammeExplorer.options(d.programmes,initial);picker.value=initial;picker.disabled=false;picker.onchange=()=>selectContext(picker.value);selectContext(initial)}).catch(()=>{$('#integration-status').textContent='The synthetic extract could not load. Reload this page when the site is available.';$('#integration-next').disabled=true});
 })();
 

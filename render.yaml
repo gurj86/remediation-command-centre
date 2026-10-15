@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: gurjit-remediation-command-centre
+    runtime: static
+    buildCommand: python3 analytics/build.py
+    staticPublishPath: ./dist
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /analytics.json
+        name: Cache-Control
+        value: public, max-age=300
+

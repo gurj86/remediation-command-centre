@@ -4,6 +4,10 @@ A portfolio prototype by **Gurjit Kaila** demonstrating business analysis, data 
 
 **Synthetic data only. No live Aptean Respond API connection. No production deployment or enterprise implementation is claimed.** Aptean Respond is an example upstream complaint-management platform in a conceptual architecture; this project is not affiliated with or endorsed by Aptean.
 
+**[Explore the live demo](https://gurjit-remediation-command-centre.cloakcoin.chatgpt.site)** · [GitHub source](https://github.com/gurj86/remediation-command-centre)
+
+Hosted publicly on Sites for v1. Render deployment configuration is supplied; no Render deployment is claimed.
+
 ## Why this project
 
 Regulated remediation teams need to understand where work stalls, which customer-harm themes overlap, where exceptions concentrate and how capacity decisions change outcomes. This prototype turns those questions into traceable operational MI and a reviewable target operating model. Gurjit's complaints/remediation platform experience informs the problem framing, rather than a claim to have implemented these integrations at an employer.

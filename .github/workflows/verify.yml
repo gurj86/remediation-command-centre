@@ -1,0 +1,14 @@
+name: Verify analytics and forecast
+on: [push, pull_request]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rebuild synthetic analytics
+        run: python3 analytics/build.py
+      - name: Reconcile data and formulas
+        run: |
+          python3 -m unittest discover -s tests
+          node tests/scenario.test.cjs
+          node --check dist/app.js

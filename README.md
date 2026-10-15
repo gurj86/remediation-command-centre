@@ -16,9 +16,9 @@ Regulated remediation teams need to understand where work stalls, which customer
 
 - **Product/programme explorer:** selecting one of six areas or either motor-finance pathway replaces metrics, process queues, the 3D harm network, risk measures, cohorts, trends, redress analysis, brief and scenario baseline with independently calculated Python/SQLite subset aggregates. Complaint-type case lists retain source lineage. Selections are encoded in the URL. Changing context resets the scenario and review acknowledgement. CSV downloads always contain all 10,000 cases.
 - **Aptean Respond integration concept:** prominent landing-page entry points lead to a six-step working simulation: fictional source case, governed transfer, explicit field mapping, validation/quarantine, batch analytics and lineage, and human review. My experience using Respond for complaints and remediation across my past four or five live projects grounds this proposed design. It is not a live connection or a claimed implementation on those projects.
-- **3D harm constellation:** rotate, zoom and select seven primary-cause clusters around Customer Harm. Node area encodes primary-cause volume, height encodes mean redress among upheld decisions, and link width encodes paired theme co-occurrence. Keyboard-accessible theme buttons provide equivalent drill-down.
+- **3D harm constellation:** rotate, zoom and select seven primary-cause clusters around Customer Harm. Node area encodes primary-cause volume, colour encodes sampled QA failure on a fixed 0–100% scale; mean upheld redress is shown in the detail panel, and link width encodes paired theme co-occurrence. Keyboard-accessible theme buttons provide equivalent drill-down.
 - **Process intelligence:** Complaint Intake → Evidence → Investigation → Decision → Redress → FRL → Closure. Select queues for volumes, stage age, seven-day exits, overdue pressure and case evidence.
-- **Risk concentration:** product × team heatmap and 3D landscape. Switch among a disclosed risk index, recorded redress, QA failure rate, overdue cases and additional-support populations.
+- **Risk concentration:** clickable product × team heatmap and highest-first comparison. Switch among a disclosed risk index, recorded redress, QA failure rate, overdue cases and additional-support populations.
 - **Analytical evidence:** migration cohorts, additional-support comparisons, monthly intake/closures and QA trend, redress distribution and IQR outliers. Inspect synthetic cases and download the complete CSV.
 - **Scenario lab:** population, case reviewers, handling hours, QA sample rate, QA reviewers and expected uphold rate. Outputs include working-day duration, modelled redress, reviewers required for 60 days and the QA queue at review completion.
 - **Management brief:** three deterministic, metric-grounded summaries with source references. Local acknowledgement and downloadable review pack; no real workflow approval is performed.
@@ -123,7 +123,7 @@ Vendor context: [Aptean complaints and case management](https://www.aptean.com/e
 
 `dist/programmes.json` is the shared illustrative taxonomy. Collections & Recoveries is a mutually exclusive synthetic operational population, not a financial product or an overlapping count of mortgage cases. Underlying account-product distinctions would need additional fields in a real implementation. Root-cause nodes are broad operational themes; they do not establish a mechanical diagnosis or legal liability. Review flags cover historical and open cases unless explicitly labelled awaiting review. Cases awaiting specialist review are counted from the synthetic `Required` state. Specialist suitability/loss calculations, affordability/forbearance decisions, commission scheme rules and mechanical/warranty determinations are outside this prototype.
 
-The build produces `analytics.json` and `synthetic-cases.csv`. Neither generated file is tracked in the repository; run `python analytics/build.py` before preview or tests. JSON contains the complete 10,000-case snapshot plus aggregate-only views for six areas and two motor pathways; the browser filters case evidence to the same scope without inventing metrics. The same Python analytics function calculates each scope. Use a WebGL landscape for all areas and a 3D team-risk profile for a single selected area.
+The build produces `analytics.json` and `synthetic-cases.csv`. Neither generated file is tracked in the repository; run `python analytics/build.py` before preview or tests. JSON contains the complete 10,000-case snapshot plus aggregate-only views for six areas and two motor pathways; the browser filters case evidence to the same scope without inventing metrics. The same Python analytics function calculates each scope. The comparison tiles work across all areas and single-product scopes; colours are relative to the selected measure and population.
 
 ## Plain-English walkthrough and case progress
 
@@ -142,4 +142,5 @@ WebGL-capable desktop browsers provide the full 3D experience. Theme buttons off
 ## Third-party asset
 
 Plotly.js 3.0.1, distributed under the MIT licence. Vendored from the official Plotly CDN. See `dist/vendor/PLOTLY-LICENSE.txt`. Google Fonts supplies DM Sans and Manrope when online; system sans-serif remains usable offline.
+
 

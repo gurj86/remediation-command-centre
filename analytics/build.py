@@ -12,6 +12,11 @@ PROGRAMMES = json.loads((ROOT/'dist'/'programmes.json').read_text(encoding='utf-
 PRODUCTS = [p['product'] for p in PROGRAMMES]
 TEAMS = ['North', 'Central', 'South', 'Specialist']
 
+def progress_state(c):
+    if c['status']=='Closed': return 'Closed'
+    blocked=(c['stage']!='Complaint Intake' and c['evidence_status']!='Complete') or (c['stage'] in ['Investigation','Decision','Redress','FRL'] and c['specialist_review']=='Required') or (c['stage'] in ['Decision','Redress','FRL'] and c['qa_result']=='Fail') or (c['stage'] in ['Redress','FRL'] and c['outcome']=='Pending') or (c['safety_flag'] and c['specialist_review']!='Completed')
+    return 'Open — waiting for evidence or review' if blocked else 'Open — ready for the next action'
+
 def generate(n=10000):
     r = random.Random(86)
     rows=[]
@@ -45,6 +50,7 @@ def generate(n=10000):
         rows[-1]['safety_flag']=int(complaint['name']=='Vehicle braking or safety concern')
         rows[-1]['model_duration_days']=duration
         rows[-1]['stage_entered_date']=stage_entered.isoformat()
+        rows[-1]['progress_status']=progress_state(rows[-1])
     return rows
 
 def calculate(rows):
@@ -104,7 +110,8 @@ def calculate(rows):
     complaint_types=q("""SELECT complaint_type,COUNT(*) volume,SUM(status='Open') open,SUM(redress) redress,
       SUM(evidence_status='Incomplete') evidence_gaps,SUM(specialist_review='Required') specialist_pending,
       SUM(safety_flag=1) safety_flags FROM cases GROUP BY complaint_type ORDER BY volume DESC""")
-    return dict(as_of=AS_OF.isoformat(),metrics=metrics,stages=stages,causes=causes,links=links,risk=risk,cohorts=cohorts,vulnerability=vulnerability,monthly=monthly,weekly=weekly,distribution=distribution,outlier_fence=fence,outlier_count=sum(x>fence for x in redresses),top_cases=sorted(rows,key=lambda x:x['redress'],reverse=True)[:20],complaint_types=complaint_types,cases=rows)
+    readiness=q("SELECT progress_status status,COUNT(*) volume FROM cases GROUP BY progress_status")
+    return dict(as_of=AS_OF.isoformat(),metrics=metrics,stages=stages,causes=causes,links=links,risk=risk,cohorts=cohorts,vulnerability=vulnerability,monthly=monthly,weekly=weekly,distribution=distribution,outlier_fence=fence,outlier_count=sum(x>fence for x in redresses),top_cases=sorted(rows,key=lambda x:x['redress'],reverse=True)[:20],complaint_types=complaint_types,readiness=readiness,cases=rows)
 
 def build_package(rows):
     result=calculate(rows)

@@ -10,7 +10,7 @@ const sceneAxis={showgrid:true,gridcolor:'#e4ebe1',zeroline:false,showbackground
 function showCases(title,predicate){
  const rows=D.cases.filter(predicate).sort((a,b)=>b.redress-a.redress);
  $('#case-title').textContent=title;$('#case-context').textContent=`${num(rows.length)} matching synthetic cases · snapshot ${D.as_of} · recorded redress is not necessarily paid`;
- $('#case-body').replaceChildren(...rows.slice(0,100).map(row=>{const tr=document.createElement('tr');[row.case_id,row.product,row.complaint_type,row.evidence_status,row.specialist_review,row.stage,row.root_cause,row.vulnerable?'Additional support':'Standard',row.qa_result,money(row.redress),row.sla_status].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.append(td)});return tr}));
+ $('#case-body').replaceChildren(...rows.slice(0,100).map(row=>{const tr=document.createElement('tr');[row.case_id,row.product,row.complaint_type,row.evidence_status,row.specialist_review,row.progress_status,row.stage,row.root_cause,row.vulnerable?'Additional support':'Standard',row.qa_result,money(row.redress),row.sla_status].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.append(td)});return tr}));
  $('#case-dialog').showModal();
 }
 function metrics(){const m=D.metrics;$('#metrics').innerHTML=[['SELECTED POPULATION',num(m.total),currentScope==='all'?'All synthetic cases':currentScope.replace('::',' · ')],['OPEN CASES',num(m.open),`${pct(m.closed,m.total)} closed to date`],['RECORDED REDRESS',compact(m.redress),'Upheld decisions · not payment MI'],['QA FAILURE RATE',pct(m.qa_fails,m.qa_sampled),`${num(m.qa_fails)} / ${num(m.qa_sampled)} sampled`],['OVERDUE OPEN CASES',num(m.overdue),'Beyond fictional 56-day target']].map((x,i)=>`<div class="metric ${i===4?'alert':''}"><small>${x[0]}</small><strong>${x[1]}</strong><span>${x[2]}</span></div>`).join('')}
@@ -108,7 +108,7 @@ function applyScope(key){
 async function start(){
  try{
  if(!$('#programme-select')){window.location.replace('index.html?release=six-areas-1');return}
- const response=await fetch('analytics.json?v=six-areas-1');if(!response.ok)throw Error('Extract could not be loaded');ROOT_DATA=await response.json();
+ const response=await fetch('analytics.json?v=plain-english');if(!response.ok)throw Error('Extract could not be loaded');ROOT_DATA=await response.json();
  const picker=$('#programme-select');
  const requested=new URLSearchParams(window.location.search).get('scope')||'all';
  currentScope=requested==='all'||ROOT_DATA.views[requested]?requested:'all';

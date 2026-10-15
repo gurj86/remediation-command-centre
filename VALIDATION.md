@@ -30,3 +30,9 @@ Browser checks are representative interactions, not exhaustive accessibility or 
 - Respond adapter checks cover all six contexts and both motor pathways, with accepted/rejected reconciliation and rejection of a mismatched complaint classification.
 - Forecast tests continue to pass. Browser verification is completed against the Render deployment after publication.
 
+## Recruiter-friendly walkthrough update
+
+- Record checks allow incomplete investigation evidence to remain visible, while rejecting invalid open/closed states.
+- Tests reconcile all 10,000 Python/JavaScript readiness classifications and eight scoped progress totals, including intake triage, specialist/QA blocking, safety review and historical closed state.
+- The printable report is rendered from the same accepted sample and acknowledgement state as the walkthrough. Browser interaction checks are performed on Render after publication.
+

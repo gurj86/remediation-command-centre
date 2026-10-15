@@ -5,7 +5,7 @@
   "description": "Synthetic financial services remediation analytics portfolio prototype",
   "scripts": {
     "build": "python analytics/build.py",
-    "test": "python -m unittest discover -s tests && node tests/scenario.test.cjs && node tests/respond-adapter.test.cjs",
+    "test": "python -m unittest discover -s tests && node tests/scenario.test.cjs && node tests/respond-adapter.test.cjs && node tests/readiness.test.cjs",
     "preview": "python -m http.server 8765 --directory dist"
   }
 }

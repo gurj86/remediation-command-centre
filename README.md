@@ -46,6 +46,7 @@ python analytics/build.py
 python -m unittest discover -s tests
 node tests/scenario.test.cjs
 node tests/respond-adapter.test.cjs
+node tests/readiness.test.cjs
 python -m http.server 8765 --directory dist
 ```
 
@@ -102,7 +103,7 @@ The `gurj86/remediation-command-centre` repository is connected to the Render St
 
 `dist/respond-integration.html` makes the proposed upstream connection a central portfolio feature. `respond-adapter.js` transforms a fictional source contract into analytical fields and validates a local fixture drawn from the same synthetic dataset as the command centre. It does not implement a vendor API.
 
-The walkthrough offers six contexts and both motor-finance pathways, with relevant cases, evidence and control points. The fixture contains 12 source cases and optionally adds three deliberate exceptions: duplicate reference, missing reference and negative recorded award. The adapter computes input/accepted/rejected reconciliation, accepted award totals and sampled-QA denominators. Rejected rows never enter this batch’s analytics. The 10,000-case programme snapshot is unchanged by the walkthrough. Its lineage link opens the selected context and matching cause, while the integration batch remains a separately labelled 12-case fixture. Case lineage links to the matching cause in the 3D network. A downloadable JSON evidence pack includes mapping, exceptions, computed totals and a local reviewer acknowledgement.
+The walkthrough offers six contexts and both motor-finance pathways, with relevant cases, evidence and control points. The fixture contains 12 source cases and optionally adds three deliberate exceptions: duplicate reference, missing reference and negative recorded award. The adapter computes input/accepted/rejected reconciliation, accepted award totals and sampled-QA denominators. Rejected rows never enter this batch’s analytics. The 10,000-case programme snapshot is unchanged by the walkthrough. Its lineage link opens the selected context and matching cause, while the integration batch remains a separately labelled 12-case fixture. Case lineage links to the matching cause in the 3D network. The final step offers a readable summary report with browser Print / Save as PDF. Optional JSON technical data is tucked inside technical details and includes mapping, exceptions, computed totals and a local reviewer acknowledgement. No download is required to finish or explore the dashboard.
 
 The CSV/API choice is a **design explanation**, not a connection switch. There are no requests to Aptean, invented vendor endpoints, credentials, persistent quarantine, cross-batch deduplication, source corrections or write-backs. Source field names and the concept screen are independently designed illustrations, not Respond UI or an official schema. Exact supported interfaces depend on the installed/configured deployment and require agreement with the platform owner and Aptean. A real implementation requires secure server-side access, data-contract agreement, event semantics, checkpoint/retry/replay design, source reconciliation, monitoring, data protection and operational approval.
 
@@ -123,6 +124,16 @@ Vendor context: [Aptean complaints and case management](https://www.aptean.com/e
 `dist/programmes.json` is the shared illustrative taxonomy. Collections & Recoveries is a mutually exclusive synthetic operational population, not a financial product or an overlapping count of mortgage cases. Underlying account-product distinctions would need additional fields in a real implementation. Root-cause nodes are broad operational themes; they do not establish a mechanical diagnosis or legal liability. Review flags cover historical and open cases unless explicitly labelled awaiting review. Cases awaiting specialist review are counted from the synthetic `Required` state. Specialist suitability/loss calculations, affordability/forbearance decisions, commission scheme rules and mechanical/warranty determinations are outside this prototype.
 
 The build produces `analytics.json` and `synthetic-cases.csv`. Neither generated file is tracked in the repository; run `python analytics/build.py` before preview or tests. JSON contains the complete 10,000-case snapshot plus aggregate-only views for six areas and two motor pathways; the browser filters case evidence to the same scope without inventing metrics. The same Python analytics function calculates each scope. Use a WebGL landscape for all areas and a 3D team-risk profile for a single selected area.
+
+## Plain-English walkthrough and case progress
+
+The six steps explain **the information’s journey**, not a complaint being resolved: choose a case; move the information; match the information; check the records; explore the dashboard; review and finish. Code and implementation details are collapsed by default. Step five prominently links to the selected theme in the 3D explorer and offers a separate route to human review. Step six includes an enabled finish action, a readable summary with browser Print / Save as PDF, and optional technical JSON. The browser controls the PDF destination and filename; no backend PDF service is used.
+
+Data acceptance is independent of case status, evidence completeness and readiness. An open case with incomplete evidence can pass the record checks. Three complaint-progress categories are shown separately: **open—waiting for evidence or review**, **open—ready for the next action**, and **closed**. Totals are computed for the accepted 12-case sample and, independently, the selected programme population.
+
+Illustrative readiness rules: closed status remains closed; intake may be ready for triage while later investigation evidence is still outstanding; all other stages need complete evidence. Investigation and later stages also require any specialist review to be completed. Decision and later stages must not have an unresolved QA failure. Redress and final-letter stages need a recorded decision. A reported safety concern requires completed specialist review. Passing these example checks does not authorise an action, reopen a case or alter any source record. The client-side rule and Python classifications are reconciled for all 10,000 generated cases by tests.
+
+The readable report distinguishes sample record checks, complaint progress, recorded awards and complaint-handling QA. It includes source reference, reporting scope, transfer example, exception reasons, rule limitations, local acknowledgement and the difference between the 12-case sample and the full dashboard population. No real approval, payment or persistent audit is created.
 
 ## Known limits
 

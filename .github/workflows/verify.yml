@@ -11,4 +11,7 @@ jobs:
         run: |
           python3 -m unittest discover -s tests
           node tests/scenario.test.cjs
+          node tests/respond-adapter.test.cjs
           node --check dist/app.js
+          node --check dist/respond.js
+

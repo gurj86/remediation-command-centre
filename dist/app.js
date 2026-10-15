@@ -36,7 +36,8 @@ function network(){
  });
  $('#cause-buttons').innerHTML=D.causes.map(c=>`<button data-cause="${c.name}">${c.name}</button>`).join('');
  $$('#cause-buttons button').forEach(b=>b.onclick=()=>causeDetail(D.causes.find(c=>c.name===b.dataset.cause)));
- causeDetail(null);
+ const linkedCause=new URLSearchParams(window.location.search).get('cause');
+ causeDetail(D.causes.find(c=>c.name===linkedCause)||null);
 }
 function process(){
  const max=Math.max(...D.stages.filter(s=>s.stage!=='Closure').map(s=>s.volume));

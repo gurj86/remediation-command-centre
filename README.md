@@ -4,9 +4,9 @@ A portfolio prototype by **Gurjit Kaila** demonstrating business analysis, data 
 
 **Synthetic data only. No live Aptean Respond API connection. No production deployment or enterprise implementation is claimed.** Aptean Respond is an example upstream complaint-management platform in a conceptual architecture; this project is not affiliated with or endorsed by Aptean.
 
-**[Explore the live demo](https://gurjit-remediation-command-centre.cloakcoin.chatgpt.site)** · [GitHub source](https://github.com/gurj86/remediation-command-centre)
+**[Explore the live demo on Render](https://gurjit-remediation-command-centre.onrender.com/)** · **[Aptean Respond integration walkthrough](https://gurjit-remediation-command-centre.onrender.com/respond-integration.html)** · [GitHub source](https://github.com/gurj86/remediation-command-centre)
 
-Hosted publicly on Sites for v1. Render deployment configuration is supplied; no Render deployment is claimed.
+Hosted publicly on Render as a static site. The original v1 Sites deployment remains a separate earlier snapshot.
 
 ## Why this project
 
@@ -14,6 +14,7 @@ Regulated remediation teams need to understand where work stalls, which customer
 
 ## Explore the experience
 
+- **Aptean Respond integration concept:** prominent landing-page entry points lead to a six-step working simulation: fictional source case, governed transfer, explicit field mapping, validation/quarantine, batch analytics and lineage, and human review. Gurjit’s experience using Respond for complaints and remediation across his past four or five live projects grounds this proposed design. It is not a live connection or a claimed implementation on those projects.
 - **3D harm constellation:** rotate, zoom and select seven primary-cause clusters around Customer Harm. Node area encodes primary-cause volume, height encodes mean redress among upheld decisions, and link width encodes paired theme co-occurrence. Keyboard-accessible theme buttons provide equivalent drill-down.
 - **Process intelligence:** Complaint Intake → Evidence → Investigation → Decision → Redress → FRL → Closure. Select queues for volumes, stage age, seven-day exits, overdue pressure and case evidence.
 - **Risk concentration:** product × team heatmap and 3D landscape. Switch among a disclosed risk index, recorded redress, QA failure rate, overdue cases and additional-support populations.
@@ -43,6 +44,7 @@ Requires Python 3.10+ and Node.js for the scenario checks. No Python packages or
 python analytics/build.py
 python -m unittest discover -s tests
 node tests/scenario.test.cjs
+node tests/respond-adapter.test.cjs
 python -m http.server 8765 --directory dist
 ```
 
@@ -92,7 +94,17 @@ Parallel pipelines, 6 productive hours/day, no new arrivals, absence, ramp-up, d
 
 `dist/` is deployable on any static host. `render.yaml` defines a Render Static Site: build `python3 analytics/build.py`, publish `dist`. The dataset and local Plotly bundle are committed so hosting can also use a no-op build command if Python is unavailable in a static runtime. This project has no server or paid AI API dependency.
 
-For a new GitHub repository under `gurj86`, upload this project, then connect it to Render as a Static Site or apply the supplied Blueprint. Choose a public demo audience for recruiter access. No Render service is claimed to exist until a live URL has been verified.
+The `gurj86/remediation-command-centre` repository is connected to the Render Static Site. Changes to the connected branch trigger Render’s deployment workflow. The public Render URL has been verified.
+
+## Aptean Respond integration concept
+
+`dist/respond-integration.html` makes the proposed upstream connection a central portfolio feature. `respond-adapter.js` transforms a fictional source contract into analytical fields and validates a local fixture drawn from the same synthetic dataset as the command centre. It does not implement a vendor API.
+
+The fixture contains 12 source cases and optionally adds three deliberate exceptions: duplicate reference, missing reference and negative recorded award. The adapter computes input/accepted/rejected reconciliation, accepted award totals and sampled-QA denominators. Rejected rows never enter this batch’s analytics. The separate 10,000-case programme snapshot is unchanged by the walkthrough. Case lineage links to the matching cause in the 3D network. A downloadable JSON evidence pack includes mapping, exceptions, computed totals and a local reviewer acknowledgement.
+
+The CSV/API choice is a **design explanation**, not a connection switch. There are no requests to Aptean, invented vendor endpoints, credentials, persistent quarantine, cross-batch deduplication, source corrections or write-backs. Source field names and the concept screen are independently designed illustrations, not Respond UI or an official schema. Exact supported interfaces depend on the installed/configured deployment and require agreement with the platform owner and Aptean. A real implementation requires secure server-side access, data-contract agreement, event semantics, checkpoint/retry/replay design, source reconciliation, monitoring, data protection and operational approval.
+
+Vendor context: [Aptean complaints and case management](https://www.aptean.com/en-GB/solutions/complaints-and-case-management), [Respond product datasheet](https://lp.aptean.com/rs/181-TRF-125/images/Aptean-Respond-Datasheet-en.pdf). These describe the product and integration capability, not this illustrative contract.
 
 ## Known limits
 
